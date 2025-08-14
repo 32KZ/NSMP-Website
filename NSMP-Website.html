@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NSMP — Minecraft Events</title>
+  <meta name="description" content="NSMP runs competitive and community Minecraft events. Join the Discord, read the rules, and jump in." />
+  <meta property="og:title" content="NSMP — Minecraft Events" />
+  <meta property="og:description" content="Join the NSMP Discord to play in upcoming Minecraft events. Read the rules, ToS, Privacy Policy, and Staff." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://placehold.co/1200x630/png?text=NSMP" />
+  <meta name="theme-color" content="#53c6ff" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2353c6ff'/><text x='50' y='58' font-size='52' text-anchor='middle' fill='black' font-family='Verdana, sans-serif'>N</text></svg>">
+  <style>
+    :root{
+      --bg:#0b0f0f;
+      --panel:#121818;
+      --muted:#7f8a8a;
+      --text:#e8f4ef;
+      --brand:#53c6ff; /* light blue */
+      --brand-2:#2a9bd8;
+      --danger:#ff5d5d;
+      --accent:#9ad8ff;
+      --grid: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 64px),
+              repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 64px);
+
+      /* Role color tokens — tuned to look like Discord pills */
+      --role-admin:#ff4a4a;        /* red */
+      --role-mod:#7167ff;          /* indigo */
+      --role-staff:#ff38d6;        /* magenta/pink */
+      --role-spec:#37eaff;         /* cyan */
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body{
+      margin:0; font: 16px system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text); background: radial-gradient(1200px 800px at 20% -10%, #0f1717, transparent),
+                         radial-gradient(900px 600px at 100% 0%, #0a1311, transparent),
+                         var(--bg);
+      background-attachment: fixed;
+    }
+    .frame{ max-width: 1100px; margin: 0 auto; padding: 24px }
+    header{ position: sticky; top:0; z-index: 50; backdrop-filter: saturate(1.2) blur(8px); background: linear-gradient(180deg, rgba(11,15,15,.85), rgba(11,15,15,.55)); border-bottom: 1px solid rgba(255,255,255,.06)}
+    .nav{ display:flex; align-items:center; gap:18px; }
+    .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text) }
+    .logo{ width:36px; height:36px; border-radius:9px; background:var(--brand); color:#000; display:grid; place-items:center; font-weight:900 }
+    .brand h1{ font-size: 18px; margin:0 }
+    .spacer{ flex:1 }
+    .btn{ appearance:none; border:1px solid rgba(255,255,255,.12); padding:10px 14px; border-radius:14px; background:linear-gradient(180deg, rgba(83,198,255,.16), rgba(83,198,255,.12)); color:var(--text); text-decoration:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer }
+    .btn:hover{ border-color: rgba(255,255,255,.22) }
+    .btn.primary{ background: linear-gradient(180deg, var(--brand), var(--brand-2)); border-color: transparent; color: #021; font-weight: 700 }
+    .btn.ghost{ background: transparent }
+    nav a{ color:var(--muted); text-decoration:none; padding:10px 12px; border-radius:10px }
+    nav a.active, nav a:hover{ color:var(--text); background: rgba(255,255,255,.05) }
+    main{ min-height: calc(100dvh - 200px) }
+
+    /* hero */
+    .hero{ position: relative; overflow: clip; }
+    .hero::before{ content:""; position:absolute; inset:-2px; background: var(--grid); opacity:.8; mask: radial-gradient(600px 260px at 30% 0%, rgba(0,0,0,.8), transparent 60%); pointer-events: none; }
+    .hero, .hero *{ user-select:text }
+    .hero-inner{ display:grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items:center }
+    @media (max-width: 900px){ .hero-inner{ grid-template-columns: 1fr; } }
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.10); border-radius: 18px; padding: 18px }
+    .title{ font-size: clamp(28px, 3.6vw, 44px); line-height: 1.06; margin: 4px 0 8px; letter-spacing:.2px }
+    .subtitle{ color:var(--muted); font-size: clamp(14px, 2vw, 18px); margin: 0 0 18px }
+    .cta{ display:flex; gap:12px; flex-wrap:wrap }
+
+    /* sections */
+    .section{ display:grid; grid-template-columns: 1fr 1fr; gap:20px }
+    @media (max-width: 900px){ .section{ grid-template-columns: 1fr; } }
+    .badge{ display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:6px 10px; border-radius:999px; background:rgba(150,210,255,.12); color:var(--accent); border:1px solid rgba(150,210,255,.3) }
+
+    /* list/rows */
+    .list{ display:grid; gap:10px }
+    .row{ display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:12px 14px; border-radius:12px }
+    .row strong{ font-weight:700 }
+
+    /* quick links style */
+    .list a.row{ color: var(--brand); text-decoration:none; border-color: rgba(83,198,255,.25); }
+    .list a.row strong{ color: var(--brand); }
+    .list a.row:hover{ background: rgba(83,198,255,.10); }
+
+    /* prose pages */
+    .prose{ color: #dfe9e4; line-height:1.65 }
+    .prose h2{ font-size:28px; margin: 8px 0 12px }
+    .prose h3{ font-size:20px; margin: 18px 0 8px }
+    .prose p{ margin: 8px 0 }
+    .prose ul{ margin: 8px 0 8px 20px }
+    .stamp{ font-size: 12px; color: var(--muted) }
+
+    /* staff cards */
+    .grid-staff{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px }
+    @media (max-width: 900px){ .grid-staff{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px){ .grid-staff{ grid-template-columns: 1fr; } }
+    .staff-card{ background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding:14px; display:flex; gap:12px; align-items:flex-start }
+    .staff-card img{ width:56px; height:56px; border-radius:12px; object-fit:cover; background:#0e1416; border:1px solid rgba(255,255,255,.08) }
+
+    /* Discord-like role pills */
+    .role{ --c:#8ecbff; /* fallback */
+      display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:.2px;
+      padding:4px 10px; border-radius:999px; line-height:1;
+      color:var(--c); background:linear-gradient(180deg, rgba(142,203,255,.16), rgba(142,203,255,.06));
+      border:1px solid rgba(142,203,255,.45);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.45), 0 0 14px rgba(142,203,255,.12);
+      text-shadow: 0 0 6px rgba(0,0,0,.2);
+      transform: translateZ(0); /* crisper text */
+    }
+    .role .at{ opacity:.9; margin-right:2px }
+    .role .stars{ letter-spacing:.5px; font-weight:900 }
+    .role .label{ font-weight:700 }
+
+    /* Variants */
+    .role.admin{ --c: var(--role-admin); color: #ff6b6b; background:linear-gradient(180deg, rgba(255,74,74,.18), rgba(255,74,74,.08)); border-color: rgba(255,74,74,.55); box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 0 18px rgba(255,74,74,.18) }
+    .role.mod{ --c: var(--role-mod); color:#9a95ff; background:linear-gradient(180deg, rgba(113,103,255,.18), rgba(113,103,255,.08)); border-color: rgba(113,103,255,.55); box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 0 18px rgba(113,103,255,.18) }
+    .role.staff{ --c: var(--role-staff); color:#ff82e3; background:linear-gradient(180deg, rgba(255,56,214,.18), rgba(255,56,214,.08)); border-color: rgba(255,56,214,.55); box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 0 18px rgba(255,56,214,.18) }
+    .role.specialist{ --c: var(--role-spec); color:#9af3ff; background:linear-gradient(180deg, rgba(55,234,255,.18), rgba(55,234,255,.08)); border-color: rgba(55,234,255,.55); box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 0 18px rgba(55,234,255,.18) }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="frame nav">
+      <a class="brand" href="#/" data-link>
+        <div class="logo">N</div>
+        <h1>NSMP</h1>
+      </a>
+      <nav>
+        <a href="#/" data-link id="nav-home">Home</a>
+        <a href="#/rules" data-link id="nav-rules">Event Rules</a>
+        <a href="#/tos" data-link id="nav-tos">Terms</a>
+        <a href="#/privacy" data-link id="nav-privacy">Privacy</a>
+        <a href="#/staff" data-link id="nav-staff">Staff</a>
+      </nav>
+      <div class="spacer"></div>
+      <a class="btn" id="copyInvite">Copy Discord Invite</a>
+      <a class="btn primary" id="joinDiscord" target="_blank" rel="noopener">Join Discord</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="frame" id="app"></div>
+  </main>
+
+  <footer>
+    <div class="frame grid">
+      <div>
+        <div class="tiny">© <span id="year"></span> NSMP. Unofficial Minecraft events. Not affiliated with Mojang or Microsoft.</div>
+        <div class="tiny">Questions? DM staff in the Discord.</div>
+      </div>
+      <div class="tiny"> 
+        <a href="#/tos">Terms</a> · 
+        <a href="#/privacy">Privacy</a> · 
+        <a href="#/rules">Event Rules</a> ·
+        <a href="#/staff">Staff</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* =============================
+       CONFIG — update these values
+       ============================= */
+    const DISCORD_INVITE_URL = "https://discord.gg/syxFauC7AD"; // preserved from your file
+    const CONTACT_EMAIL = "nationssmp768@gmail.com"; // preserved from your file
+
+    // Current Event Config
+    const EVENT = {
+      title: "Frostbound Winter Hardcore SMP",
+      dateText: "Undecided", // free text; e.g., "Sat, 30 Aug @ 18:00 UK"
+      slotsText: "100 - Unlimited players • Uncapped Squads of 5",
+      gameVersion: "1.21.6",
+      type: "Java", // Java or Bedrock
+      requestLink: "https://docs.google.com/forms/d/e/1FAIpQLSd60O1Nc5kpeDLbMFC5mxEYb08X3KbsYgkJeGufB71OFm8abA/viewform?usp=header"
+    };
+
+    // "What to Expect" Section Config (now editable)
+    const EVENT_DETAILS = {
+      heading: "Event Details",
+      subtitle: "A five-day, permadeath winter gauntlet with evolving events, roaming merchants, and a race to be among the final five.",
+      body: `This event will be taking place over 5 days. Within these five days you will be playing in a hardcore world where death is final. This world will have a (very obvious) winter style where different events will happen across each of the days ending either when all players die or 5 players make it to the end of the 5 days. These 5 players will win a month of Nitro for your discord account (Paid for by 32KZ so thank him!).
+
+Among other things you will form teams (recommended limit of 5 because the prize and all) and brave the frozen wilderness. Every day for an hour a travelling merchant will appear in designated spots where you can barter with them for items that are hard or impossible to get. The items the merchant sells will become better over time. This server will not have integrated lore so you guys will be the big highlight of this video. Make yourself stand out!
+
+The form to join the server will be released soon so you will be able to join (This is to allow a whitelist and get an accurate gauge of players). We hope to see you guys joining this one because if this goes well we will feel more determined to make the next event better!`
+    };
+
+    // Staff directory — edit/add entries here
+    const STAFF = [
+      // Example entries; replace avatarUrl with a Discord CDN link or any image URL
+      { avatarUrl: "https://i.imgur.com/YDGWWPH.png", username: "Gunnarology", role: "★★★ Administrator", note: "Owner of NSMP, the Founding Father if you will of what we do. been running this with sheer will, cold outreach, dedication and passion since day one. without Gunnar, None of this would be possible for us, or have even happened in the first place. this man also LOVES Starbucks, Esspecially the Femboy Cashiers." },
+      { avatarUrl: "https://i.imgur.com/PtOjhv6.gif", username: "32KZ", role: "★★★ Administrator", note: "Hey im 32KZ! Im an automations engineer and tech specialist who loves making things run smoothly. I build N8N automations to keep NSMP technologically advanced, i run the MC server, manage the Plugins, and Run the tech team! Please feel free to message me whenever you want,  im allways free to talk!" },
+      { avatarUrl: "https://i.imgur.com/jnT5fyu.gif", username: "Mr_Penguin04", role: "★★★ Administrator", note: "32KZ's right hand man, anything 32KZ Can do, Mr_Penguin04 can do just as well. quick learner, very friendly. Works on the lore, and oversees recording for the different events, managing the ☆ Event Staff" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Slathe", role: "★★ Moderator", note: "Great Supporting member in the Event planning sphere, and managing teams." },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Thomarius", role: "★★ Moderator", note: "Our Legendary Map Builder, who makes the Map For These Events!" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Gat", role: "★★ Moderator", note: "Programmer, and Event staff Coordinator, with heavy influence on the event design. based as hell" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Mr. Ching", role: "★★ Moderator", note: "Creator of our chathook, and Legendary Minecraft Plugin Coder. bro turned Around a Full MC plugin in 5 Days to hook in with 32KZ's N8N Workflows." },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Cheese God", role: "★ Specialist", note: "Structure Builder and Map Quality Assurance is my speciality, im really good at adding lore related building to our maps!" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Enderwarror - evens88", role: "★ Specialist", note: "Developer, and tech Support Specialist, Working with ching to build the best tech for the server possible!" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "JRdumptruck", role: "★ Specialist", note: "i build additions for thomarius's Maps and make sure that the quality is in place" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: ".Pix", role: "☆ Event Staff", note: "i just exist" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "Gla4ve", role: "☆ Event Staff", note: "Im part of the recording team" },
+      { avatarUrl: "https://i.imgur.com/0H7dxam.png", username: "ElkOnline", role: "☆ Event Staff", note: "Hay there! I'm Elk! Straight white male from the East Coast of the USA! I act as a journalist for our events! I help gather & edit footage for videos, interview server members and maintain player satisfaction as best I can! I'm eager to capture eventful moments during the events so please reach out to me if you are planning something that you think would make good content!" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "br.Utul", role: "☆ Event Staff", note: "Im part of the recording team" },
+      { avatarUrl: "https://i.imgur.com/xxBXa6z.jpeg", username: "AtlasNova_", role: "☆ Event Staff", note: "Im the owner of a different minecrafter server, and the newest member of the NSMP team, Im part of the recording team and i also help developing the rules for these events to ensure quality gameplay." }
+    ];
+
+    // Wire header buttons
+    const joinBtn = document.getElementById('joinDiscord');
+    const copyBtn = document.getElementById('copyInvite');
+    joinBtn.href = DISCORD_INVITE_URL;
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(DISCORD_INVITE_URL);
+        copyBtn.textContent = 'Invite copied!';
+        setTimeout(()=> copyBtn.textContent = 'Copy Discord Invite', 1600);
+      }catch(err){
+        alert('Unable to copy. Invite: ' + DISCORD_INVITE_URL);
+      }
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Simple hash router
+    const routes = {
+      '/': homeView,
+      '/rules': rulesView,
+      '/tos': tosView,
+      '/privacy': privacyView,
+      '/staff': staffView,
+    };
+
+    function router(){
+      const hash = location.hash.replace('#','');
+      const path = hash || '/';
+      const view = routes[path] || notFoundView;
+      setActiveNav(path);
+      document.getElementById('app').innerHTML = view();
+    }
+
+    function setActiveNav(path){
+      const ids = { '/':'nav-home', '/rules':'nav-rules', '/tos':'nav-tos', '/privacy':'nav-privacy', '/staff':'nav-staff' };
+      for(const id of Object.values(ids)) document.getElementById(id).classList.remove('active');
+      (document.getElementById(ids[path])||{}).classList?.add('active');
+    }
+
+    window.addEventListener('hashchange', router);
+    window.addEventListener('load', router);
+
+    /* =============================
+       Helpers
+       ============================= */
+    function roleTag(roleText){
+      // Parse leading star(s) and label (e.g., "★★★ Administrator")
+      const stars = (roleText.match(/^[☆★]+/) || [''])[0];
+      const label = roleText.replace(/^[☆★]+\s*/, '').trim();
+
+      // Map to variant class
+      const lower = label.toLowerCase();
+      let variant = '';
+      if(lower.includes('admin')) variant = 'admin';
+      else if(lower.includes('moderator')) variant = 'mod';
+      else if(lower.includes('event staff')) variant = 'staff';
+      else if(lower.includes('specialist')) variant = 'specialist';
+
+      return `<span class="role ${variant}"><span class="at">@</span><span class="stars">${stars}</span><span class="label">${label}</span></span>`;
+    }
+
+    /* =============================
+       VIEWS
+       ============================= */
+    function homeView(){
+      return `
+      <section class="hero card">
+        <div class="hero-inner">
+          <div>
+            <div class="badge">Minecraft Events • Community & Competitive</div>
+            <h2 class="title">NSMP — Play. Compete. Have fun.</h2>
+            <p class="subtitle">We host Minecraft events ranging from casual community nights to sweaty competitive brackets. Join the Discord to get notified, read the rules, and queue for the next event.</p>
+            <div class="cta">
+              <a class="btn primary" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">Join the Discord</a>
+              <a class="btn ghost" href="#/rules">View Event Rules</a>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin:8px 0 6px">Current Event</h3>
+            <div class="list" role="list">
+              <div class="row" role="listitem"><span>Title</span><strong>⚔️ ${EVENT.title}</strong></div>
+              <div class="row" role="listitem"><span>Date</span><strong>${EVENT.dateText}</strong></div>
+              <div class="row" role="listitem"><span>Slots</span><strong>${EVENT.slotsText}</strong></div>
+              <div class="row" role="listitem"><span>Game Version</span><strong>${EVENT.gameVersion}</strong></div>
+              <div class="row" role="listitem"><span>Minecraft Type</span><strong>${EVENT.type}</strong></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap">
+              <a class="btn" href="#/rules">Read Rules</a>
+              <a class="btn" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">Register on Discord</a>
+              <a class="btn primary" href="${EVENT.requestLink}" target="_blank" rel="noopener">Request to play in this event</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px" class="section">
+        <div class="card">
+          <h3 style="margin:0 0 6px">${EVENT_DETAILS.heading}</h3>
+          <p class="subtitle">${EVENT_DETAILS.subtitle}</p>
+          <div class="prose" style="white-space:pre-wrap">${EVENT_DETAILS.body}</div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 6px">Quick links</h3>
+          <div class="list">
+            <a class="row" href="#/rules"><span>Event Rules</span><strong>Read now →</strong></a>
+            <a class="row" href="#/tos"><span>Terms of Service</span><strong>NSMP terms →</strong></a>
+            <a class="row" href="#/privacy"><span>Privacy Policy</span><strong>How we handle data →</strong></a>
+            <a class="row" href="#/staff"><span>Staff Directory</span><strong>Meet the team →</strong></a>
+          </div>
+        </div>
+      </section>`;
+    }
+
+    function rulesView(){
+      return `
+      <article class="prose card">
+        <h2>Current Event Rules</h2>
+        <p class="stamp">Last updated: 14 Aug 2025</p>
+
+        <h3>1) Eligibility</h3>
+        <ul>
+          <li>${EVENT.type} Edition only unless stated otherwise in the event post.</li>
+          <li>Players must be present in the NSMP Discord voice where required.</li>
+          <li>One account per player; alts must be disclosed to staff.</li>
+        </ul>
+
+        <h3>2) Competitive Integrity</h3>
+        <ul>
+          <li>No cheats, hacked clients, macros, x-ray, ghosting, stream-sniping, or external advantages.</li>
+          <li>Mods allowed: performance/visual (e.g., OptiFine, Sodium), minimap without entity radar, full-bright if not server-blocked.</li>
+          <li>Recording/streaming is allowed unless the event states otherwise.</li>
+        </ul>
+
+        <h3>3) Conduct</h3>
+        <ul>
+          <li>Zero tolerance for hate speech, doxxing, or harassment.</li>
+          <li>Follow staff directions. Staff decisions are final during live events.</li>
+          <li>Keep comms clear in staff channels; use tickets for disputes.</li>
+        </ul>
+
+        <h3>4) Match Rules (example UHC)</h3>
+        <ul>
+          <li>Grace period: 10 minutes (no PvP).</li>
+          <li>Border: starts 1000×1000, shrinks after 30 minutes. Exact timings announced at start.</li>
+          <li>Last team standing wins. Ties resolved via admin decision or tiebreaker duel.</li>
+        </ul>
+
+        <h3>5) Penalties</h3>
+        <ul>
+          <li>Minor: warning → time/points penalty → match DQ.</li>
+          <li>Major (cheating/toxicity): season ban + report to partner communities.</li>
+        </ul>
+
+        <h3>6) Disputes</h3>
+        <p>Open a Discord ticket within 24 hours with clips/logs. Staff will review and respond ASAP.</p>
+
+        <p class="stamp">Questions? Ask a mod in Discord.</p>
+      </article>`;
+    }
+
+    function tosView(){
+      return `
+      <article class="prose card">
+        <h2>Terms of Service</h2>
+        <p class="stamp">Effective: 14 Aug 2025</p>
+        <p>By joining NSMP or participating in events, you agree to these Terms.</p>
+
+        <h3>Account & Access</h3>
+        <ul>
+          <li>You must comply with Discord's Terms of Service and Community Guidelines.</li>
+          <li>We may refuse or revoke access to events at our discretion to maintain fair play and safety.</li>
+        </ul>
+
+        <h3>Event Participation</h3>
+        <ul>
+          <li>Rules posted on the <a href="#/rules">Event Rules</a> page are incorporated into these Terms.</li>
+          <li>Match formats, prizes (if any), and schedules may change due to technical or safety reasons.</li>
+          <li>Decisions made by staff during live events are binding to keep the event running.</li>
+        </ul>
+
+        <h3>Content & IP</h3>
+        <ul>
+          <li>You retain rights to your recordings/streams. By participating, you grant NSMP a non-exclusive license to repost clips, VODs, or highlights for promotional purposes with credit where feasible.</li>
+          <li>NSMP branding and site assets may not be used without permission.</li>
+        </ul>
+
+        <h3>Safety</h3>
+        <ul>
+          <li>No harassment, threats, or doxxing. Violations may result in removal and bans.</li>
+          <li>Report issues to staff via tickets or DMs immediately.</li>
+        </ul>
+
+        <h3>Liability</h3>
+        <ul>
+          <li>Events are provided "as is". We are not liable for outages, software issues, or losses arising from participation.</li>
+          <li>If we offer prizes, our responsibility is limited to the specified prize delivery terms.</li>
+        </ul>
+
+        <h3>Changes</h3>
+        <p>We may update these Terms. Material changes will be announced in Discord and reflected here with a new effective date.</p>
+
+        <p class="stamp">Contact: ${CONTACT_EMAIL}</p>
+      </article>`;
+    }
+
+    function privacyView(){
+      return `
+      <article class="prose card">
+        <h2>Privacy Policy</h2>
+        <p class="stamp">Effective: 14 Aug 2025</p>
+
+        <h3>Summary</h3>
+        <p>We collect the minimum necessary information to run events and moderate the community.</p>
+
+        <h3>What we collect</h3>
+        <ul>
+          <li>Discord user ID, username, and roles (from your participation in the server).</li>
+          <li>Event metadata: registrations, match results, POV links, and rule violation records.</li>
+          <li>Technical logs (timestamps, IPs) from Discord and our hosting providers for security.</li>
+        </ul>
+
+        <h3>How we use data</h3>
+        <ul>
+          <li>To operate events, enforce rules, and improve competitive integrity.</li>
+          <li>To investigate reports and protect the safety of participants.</li>
+          <li>To announce schedules and publish results. We may share winners and highlights publicly.</li>
+        </ul>
+
+        <h3>Sharing</h3>
+        <ul>
+          <li>We do not sell personal data.</li>
+          <li>We may share limited data with moderation partners or platform providers strictly for safety and operations.</li>
+        </ul>
+
+        <h3>Retention</h3>
+        <p>We keep event records for as long as necessary for integrity and community safety, then delete or anonymize.</p>
+
+        <h3>Your choices</h3>
+        <ul>
+          <li>You can request access or deletion of NSMP-held data where applicable. Some records may be retained for safety or legal reasons.</li>
+          <li>Contact us at ${CONTACT_EMAIL} for requests.</li>
+        </ul>
+
+        <h3>Security</h3>
+        <p>We use reasonable technical and administrative safeguards. No system is 100% secure.</p>
+
+        <h3>Changes</h3>
+        <p>We may update this policy. We will post changes here and announce in Discord for material updates.</p>
+
+        <p class="stamp">Questions? Email ${CONTACT_EMAIL}.</p>
+      </article>`;
+    }
+
+    function staffView(){
+      const items = STAFF.map(s => `
+        <div class="staff-card">
+          <img src="${s.avatarUrl}" alt="${s.username} avatar" onerror="this.src='https://placehold.co/120x120/png'" />
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+              <strong style="font-size:16px">${s.username}</strong>
+              ${roleTag(s.role)}
+            </div>
+            <div class="tiny" style="margin-top:6px; white-space:pre-wrap">${s.note || ''}</div>
+          </div>
+        </div>`).join('');
+
+      return `
+      <article class="prose card">
+        <h2>Staff Directory</h2>
+        <p class="subtitle">Meet the crew that keeps NSMP fair, fun, and moving fast.</p>
+        <div class="grid-staff" style="margin-top:12px">${items}</div>
+      </article>`;
+    }
+
+    function notFoundView(){
+      return `<div class="card"><h3>404</h3><p class="subtitle">That page doesn't exist. <a href="#/">Go home</a>.</p></div>`
+    }
+  </script>
+</body>
+</html>
